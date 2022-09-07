@@ -7,16 +7,27 @@ const bcrypt = require('bcryptjs')
 const app = express()
 const PORT = 3000
 
+// 資料庫設定
 const db = require('./models')
 const Todo = db.Todo
 const User = db.User
+
+const passport = require('passport')
+const usePassport = require('./config/passport') // 載入設定檔，要寫在 express-session 以後
 
 app.engine('hbs', exphbs.engine({ defaultLayout: 'main', extname: '.hbs'}))
 app.set('view engine', 'hbs')
 
 // middleware
+app.use(session({
+  secret: 'ThisIsMySecret',
+  resave: false,
+  saveUninitialized: true
+}))
 app.use(express.urlencoded({ extended: true })) // 使用body-parser
 app.use(methodOverride('_method'))
+usePassport(app)  // 呼叫 Passport 函式並傳入 app，這條要寫在路由之前
+
 
 
 app.get('/', (req, res) => {
@@ -40,9 +51,10 @@ app.get('/users/login', (req, res) => {
   res.render('login')
 })
 
-app.post('/users/login', (req, res) => {
-  res.send('login')
-})
+app.post('/users/login', passport.authenticate('local', {
+  successRedirect: '/',
+  failureRedirect: '/users/login'
+}))
 
 app.get('/users/register', (req, res) => {
   res.render('register')
@@ -70,7 +82,7 @@ app.post('/users/register', (req, res) => {
         email,
         password: hash
       }))
-      .then(() => res.redirect('/'))
+      .then(() => res.redirect('/users/login'))
       .catch(err => console.log(err))
 })
 

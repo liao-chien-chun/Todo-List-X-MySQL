@@ -1,4 +1,5 @@
 const express = require('express')
+const session = require('express-session')
 const exphbs = require('express-handlebars')
 const methodOverride = require('method-override')
 const bcrypt = require('bcryptjs')
@@ -24,7 +25,15 @@ app.get('/', (req, res) => {
     nest: true
   })
     .then((todos) => { return res.render('index', { todos: todos }) })
-    .catch(err => { return res.status(422).json(err) })
+    .catch((error) => { return res.status(422).json(error) })
+})
+
+app.get('/todos/:id', (req, res) => {
+  const id = req.params.id
+  return Todo.findByPk(id)
+    .then(todo => res.render('detail', { todo: todo.toJSON() }))
+    .catch((error) => { return res.status(422).json(error) }) // 但我用這個才能顯示
+    // .catch(error = console.log(error))  // 教案用這個
 })
 
 app.get('/users/login', (req, res) => {
@@ -41,12 +50,28 @@ app.get('/users/register', (req, res) => {
 
 app.post('/users/register', (req, res) => {
   const { name, email, password, confirmPassword } = req.body
-  User.create({
-    name,
-    email,
-    password
-  })
-  .then(user => res.redirect('/'))
+  User.findOne({ where: { email } })
+    .then(user => {
+      if(user) {
+        console.log('User already exists')
+        return res.render('register', {
+          name,
+          email,
+          password,
+          confirmPassword
+        })
+      }
+    })
+    return bcrypt
+      .genSalt(10)
+      .then(salt => bcrypt.hash(password, salt))
+      .then(hash => User.create({
+        name,
+        email,
+        password: hash
+      }))
+      .then(() => res.redirect('/'))
+      .catch(err => console.log(err))
 })
 
 app.get('/users/logout', (req, res) => {

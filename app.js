@@ -19,7 +19,12 @@ app.use(methodOverride('_method'))
 
 
 app.get('/', (req, res) => {
-  res.send('hello world')
+  return Todo.findAll({
+    raw: true,
+    nest: true
+  })
+    .then((todos) => { return res.render('index', { todos: todos }) })
+    .catch(err => { return res.status(422).json(err) })
 })
 
 app.get('/users/login', (req, res) => {

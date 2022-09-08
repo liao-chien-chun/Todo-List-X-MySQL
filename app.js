@@ -39,6 +39,15 @@ app.get('/', (req, res) => {
     .catch((error) => { return res.status(422).json(error) })
 })
 
+// 新增頁
+app.get('/todos/new', (req, res) => {
+  res.render('new')
+})
+// 寫進資料庫
+app.post('/todos', (req, res) => {
+  console.log(req.user.id)
+})
+
 app.get('/todos/:id', (req, res) => {
   const id = req.params.id
   return Todo.findByPk(id)

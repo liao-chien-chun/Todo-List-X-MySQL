@@ -48,6 +48,17 @@ app.post('/todos', (req, res) => {
   console.log(req.user.id)
 })
 
+// edit頁面
+app.get('/todos/:id/edit', (req, res) => {
+  const id = req.params.id
+  Todo.findOne({ where: { id } })
+    .then(todo => {
+      res.render('edit', { todo: todo.toJSON() })
+    })
+    .catch(err => console.log(err))
+})
+
+// detail
 app.get('/todos/:id', (req, res) => {
   const id = req.params.id
   return Todo.findByPk(id)

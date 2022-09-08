@@ -2,7 +2,6 @@ const express = require('express')
 const session = require('express-session')
 const exphbs = require('express-handlebars')
 const methodOverride = require('method-override')
-const bcrypt = require('bcryptjs')
 
 const app = express()
 const PORT = 3000
@@ -14,7 +13,6 @@ const db = require('./models')
 const Todo = db.Todo
 const User = db.User
 
-const passport = require('passport')
 const usePassport = require('./config/passport') // 載入設定檔，要寫在 express-session 以後
 
 app.engine('hbs', exphbs.engine({ defaultLayout: 'main', extname: '.hbs'}))
